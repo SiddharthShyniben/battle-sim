@@ -1,0 +1,17 @@
+{
+  "name": "bs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
+  "license": "ISC",
+  "dependencies": {
+    "@nuff-said/color": "^1.0.0",
+    "pokemon-showdown": "^0.11.9",
+    "prompts": "^2.4.2"
+  }
+}
