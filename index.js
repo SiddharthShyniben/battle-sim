@@ -1,13 +1,23 @@
-const Sim = require("pokemon-showdown");
-const color = require("@nuff-said/color");
-const prompts = require("prompts");
+import { BattleStream } from "pokemon-showdown";
+import {
+  green,
+  yellow,
+  bold,
+  redBr,
+  blink,
+  red,
+  dim,
+  blue,
+  underline,
+} from "@nuff-said/color";
+import prompts from "prompts";
 
-const stream = new Sim.BattleStream();
+const stream = new BattleStream();
 
 const colors = {
-  p1: color.green,
-  p2: color.yellow,
-  default: color.bold,
+  p1: green,
+  p2: yellow,
+  default: bold,
 };
 
 let choice = null;
@@ -29,7 +39,7 @@ const playerNames = {};
 
     if (actual.startsWith("|t:|")) {
       console.log(
-        color.bold("Game started at"),
+        bold("Game started at"),
         new Date(+actual.split("|")[2]).toLocaleString(),
       );
       console.log();
@@ -38,7 +48,7 @@ const playerNames = {};
       playerNames[player] = playerName;
     } else if (actual.startsWith("|error|")) {
       const [, , error] = actual.split("|");
-      console.log(playerString(), color.redBr(color.blink(error)));
+      console.log(playerString(), redBr(blink(error)));
     } else if (actual.startsWith("|request|")) {
       const [, , requestData] = actual.split("|");
       const parsed = JSON.parse(requestData);
@@ -54,7 +64,7 @@ const playerNames = {};
         for (const move of parsed.active[0].moves) // NOTE: assumes 1v1
           console.log(
             playerString(),
-            `\t${color.red(move.move)} ${color.dim(`${move.pp}/${move.maxpp}`)}`,
+            `\t${red(move.move)} ${dim(`${move.pp}/${move.maxpp}`)}`,
           );
       else if (parsed.wait) console.log(playerString(), "\tWaiting...");
       else console.log(playerString(), "\tYou have no active pokemon! Switch.");
@@ -66,7 +76,7 @@ const playerNames = {};
       for (const pokemon of parsed.side.pokemon) // NOTE: assumes 1v1
         console.log(
           playerString(),
-          `\t${pokemon.active ? color.red(pokemon.details) : pokemon.details} ${color.blue(color.underline(pokemon.condition))} ${pokemon.item ? `holding ${pokemon.item} ` : ""}(${pokemon.ability})`,
+          `\t${pokemon.active ? red(pokemon.details) : pokemon.details} ${blue(underline(pokemon.condition))} ${pokemon.item ? `holding ${pokemon.item} ` : ""}(${pokemon.ability})`,
         );
       console.log(playerString());
 
