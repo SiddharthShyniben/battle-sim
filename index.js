@@ -97,7 +97,7 @@ const data = {};
         const { move } = await prompts({
           type: "select",
           name: "move",
-          message: "Pick a move for p1",
+          message: `Pick a move for ${choice}`,
           choices: a.active[0].moves.map((move) => ({
             title: move.move,
             value: move.id,
@@ -109,7 +109,7 @@ const data = {};
         const { pokemon } = await prompts({
           type: "select",
           name: "pokemon",
-          message: "Switch into...",
+          message: `(${choice}) Switch into...`,
           choices: a.side.pokemon
             .filter((a) => !a.active)
             .map((p) => ({
