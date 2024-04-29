@@ -36,7 +36,7 @@ class BattlePlayer {
     void this.stream.write(choice);
   }
 }
-export class RandomPlayerAI extends BattlePlayer {
+module.exports = class RandomPlayerAI extends BattlePlayer {
   constructor(playerStream, options = {}, debug = false) {
     super(playerStream, debug);
     this.move = options.move || 1.0;
@@ -252,7 +252,7 @@ export class RandomPlayerAI extends BattlePlayer {
   chooseSwitch(active, switches) {
     return this.prng.sample(switches).slot;
   }
-}
+};
 
 // Creates an array of numbers progressing from start up to and including end
 function range(start, end, step = 1) {
