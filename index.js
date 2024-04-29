@@ -47,17 +47,18 @@ const playerNames = {};
       playerNames[player] = parsed.side.name;
 
       console.log(playerString(), parsed.side.name + "'s turn...");
-      choice = player;
 
       console.log(playerString(), "Moves:");
 
-      if (parsed?.active?.[0])
+      if (parsed?.active)
         for (const move of parsed.active[0].moves) // NOTE: assumes 1v1
           console.log(
             playerString(),
             `\t${color.red(move.move)} ${color.dim(`${move.pp}/${move.maxpp}`)}`,
           );
-      else console.log(playerString(), "You have no active pokemon! Switch.");
+      else if (parsed.wait) console.log(playerString(), "\tWaiting...");
+      else console.log(playerString(), "\tYou have no active pokemon! Switch.");
+      choice = player;
 
       console.log(playerString());
       console.log(playerString(), "Pokemon:");
@@ -65,7 +66,7 @@ const playerNames = {};
       for (const pokemon of parsed.side.pokemon) // NOTE: assumes 1v1
         console.log(
           playerString(),
-          `\t${pokemon.active ? color.red(pokemon.details) : pokemon.details} ${color.dim(pokemon.condition)} ${pokemon.item ? `holding ${pokemon.item} ` : ""}(${pokemon.ability})`,
+          `\t${pokemon.active ? color.red(pokemon.details) : pokemon.details} ${color.blue(color.underline(pokemon.condition))} ${pokemon.item ? `holding ${pokemon.item} ` : ""}(${pokemon.ability})`,
         );
       console.log(playerString());
 
@@ -73,6 +74,88 @@ const playerNames = {};
       //   color.bold(player.padEnd(10, " ")),
       //   JSON.stringify(JSON.parse(requestData), null, 2),
       // );
+    } else if (output.startsWith("update\n|\n")) {
+      console.log();
+      const [, , , timestamp, ...rest] = output.split("|");
+
+      for (let i = 0; i < rest.length; i++) {
+        const item = rest[i].trim();
+
+        if (item == "move") {
+          let str = " ".repeat(11);
+
+          const [player, mover] = rest[++i].trim().split("a: "); // TODO: generalize
+          const move = rest[++i].trim();
+          const [player2, mover2] = rest[++i].trim().split("a: ");
+
+          (str +=
+            `${playerNames[player]}'s ${mover} uses ${move}` +
+            (mover !== mover2
+              ? ` on ${playerNames[player2]}'s ${mover2}`
+              : "")),
+            i++;
+
+          const slurped = [];
+          while (i < rest.length && rest[i] !== "move") slurped.push(rest[i++]);
+          i--;
+
+          for (let j = 0; j < slurped.length; j++) {
+            const item = slurped[j].trim();
+            if (item == "-damage") {
+              j++;
+              const status = slurped[++j].trim().split("/")[0];
+              j += 2;
+              const statusPercentage = slurped[++j].trim().split("/")[0];
+              str += ` and does ${status} (${statusPercentage}%) damage`;
+            } else if (item == "-boost") {
+              j++;
+              const stat = slurped[++j].trim();
+              const stages = slurped[++j].trim();
+              str += ` and raises it's ${stat} by ${stages} stages`;
+            } else if (item == "-fail") {
+              j += 2;
+              str += `... but it fails!`;
+            } else if (item == "-block") {
+              const pokemon = slurped[++j].trim();
+              const effect = slurped[++j].trim();
+              if (slurped[j + 1][0] !== "-") j += 2;
+              str += `... but ${effect} on ${pokemon} was blocked`;
+            } else if (item == "-notarget") {
+              if (item[j + 1][0] != "-") j++;
+              str += `... but there is no one to target!`;
+            } else if (item == "-miss") str += `...but it missed!`;
+            else if (item == "-immune")
+              str += `... but it's immune! (${slurped[++j]})`;
+            else if (item == "-supereffective")
+              str += `. It's super effective!`;
+            else if (item == "-status")
+              str += ` and gives it the status effect ${slurped[++j].trim()}`;
+            else if (item == "-heal") {
+              j++;
+              const status = slurped[++j].trim();
+              const why = slurped[++j].trim();
+              j += 2;
+              const statusPercentage = slurped[++j].trim();
+              const why2 = slurped[++j].trim();
+              str += ` and heals for ${status}hp (${why}) (${statusPercentage}% ${why2})`;
+            } else if (
+              item == "p1" ||
+              item == "p2" ||
+              item == "upkeep" ||
+              item == "[still]" ||
+              item == "split"
+            ) {
+            } else if (item == "turn")
+              str += `\n${" ".repeat(11)} Turn ${slurped[++j]}`;
+            else if (item == "faint")
+              str += `\n${slurped[++j].split("|")[1]} fainted!`;
+            else console.log(item);
+          }
+
+          console.log(str);
+        } else console.log({ item });
+      }
+      console.log();
     } else console.log(output);
 
     if (choice) {
@@ -91,7 +174,7 @@ const playerNames = {};
         });
 
         stream.write(`>${choice} move ${move}`);
-      } else {
+      } else if (!a.wait) {
         const { pokemon } = await prompts({
           type: "select",
           name: "pokemon",
@@ -100,12 +183,13 @@ const playerNames = {};
             .filter((a) => !a.active)
             .map((p) => ({
               title: p.details,
-              value: p.ident,
+              value: p.ident.split(" ")[1],
             })),
         });
 
         stream.write(`>${choice} switch ${pokemon}`);
       }
+
       choice = null;
     }
   }
