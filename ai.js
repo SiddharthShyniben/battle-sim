@@ -1,5 +1,4 @@
-import pkg from "pokemon-showdown";
-const { BattleStream, getPlayerStreams, Teams } = pkg;
+const { BattleStream, getPlayerStreams, Teams } = require("pokemon-showdown");
 
 import { RandomPlayerAI } from "./random-player-ai.js";
 
@@ -28,7 +27,7 @@ void p2.start();
 
 void (async () => {
   for await (const chunk of streams.omniscient) {
-    console.log(chunk);
+    console.log({ chunk });
   }
 })();
 

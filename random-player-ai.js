@@ -1,5 +1,4 @@
-import s from "pokemon-showdown";
-const { PRNG } = s;
+const { PRNG } = require("pokemon-showdown");
 
 class BattlePlayer {
   constructor(playerStream, debug = false) {

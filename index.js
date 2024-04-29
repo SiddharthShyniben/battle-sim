@@ -1,5 +1,5 @@
-import { BattleStream } from "pokemon-showdown";
-import {
+const { BattleStream } = require("pokemon-showdown");
+const {
   green,
   yellow,
   bold,
@@ -9,8 +9,8 @@ import {
   dim,
   blue,
   underline,
-} from "@nuff-said/color";
-import prompts from "prompts";
+} = require("@nuff-said/color");
+const prompts = require("prompts");
 
 const stream = new BattleStream();
 
