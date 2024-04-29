@@ -13,6 +13,8 @@ const colors = {
 let choice = null;
 
 const data = {};
+const playerNames = {};
+
 (async () => {
   for await (const output of stream) {
     let updateKind, player, actual;
@@ -22,6 +24,9 @@ const data = {};
       [updateKind, player, actual] = output.split("\n");
     }
 
+    const playerString = () =>
+      colors[player]((playerNames[player] || player).padEnd(10, " "));
+
     if (actual.startsWith("|t:|")) {
       console.log(
         color.bold("Game started at"),
@@ -29,59 +34,40 @@ const data = {};
       );
       console.log();
     } else if (actual.startsWith("|player|")) {
-      // const [, , player, playerName, _avatar, elo] = actual.split("|");
-      // console.log(
-      //   color.bold(player.padEnd(10, " ")),
-      //   "is",
-      //   playerName,
-      //   elo ? "with elo" : "",
-      //   elo,
-      // );
-      // console.log(
-      //   (player || updateKind).padEnd(25, " "),
-      //   JSON.stringify(JSON.parse(actual), null, 2),
-      // );
+      const [, , player, playerName, _avatar, _elo] = actual.split("|");
+      playerNames[player] = playerName;
     } else if (actual.startsWith("|error|")) {
       const [, , error] = actual.split("|");
-      console.log(
-        colors[player](player.padEnd(10, " ")),
-        color.redBr(color.blink(error)),
-      );
+      console.log(playerString(), color.redBr(color.blink(error)));
     } else if (actual.startsWith("|request|")) {
       const [, , requestData] = actual.split("|");
       const parsed = JSON.parse(requestData);
 
       data[player] = parsed;
+      playerNames[player] = parsed.side.name;
 
-      console.log(
-        colors[player](player.padEnd(10, " ")),
-        parsed.side.name + "'s turn...",
-      );
+      console.log(playerString(), parsed.side.name + "'s turn...");
       choice = player;
 
-      console.log(colors[player](player.padEnd(10, " ")), "Moves:");
+      console.log(playerString(), "Moves:");
 
       if (parsed?.active?.[0])
         for (const move of parsed.active[0].moves) // NOTE: assumes 1v1
           console.log(
-            colors[player](player.padEnd(10, " ")),
+            playerString(),
             `\t${color.red(move.move)} ${color.dim(`${move.pp}/${move.maxpp}`)}`,
           );
-      else
-        console.log(
-          colors[player](player.padEnd(10, " ")),
-          "You have no active pokemon! Switch.",
-        );
+      else console.log(playerString(), "You have no active pokemon! Switch.");
 
-      console.log(colors[player](player.padEnd(10, " ")));
-      console.log(colors[player](player.padEnd(10, " ")), "Pokemon:");
+      console.log(playerString());
+      console.log(playerString(), "Pokemon:");
 
       for (const pokemon of parsed.side.pokemon) // NOTE: assumes 1v1
         console.log(
-          colors[player](player.padEnd(10, " ")),
+          playerString(),
           `\t${pokemon.active ? color.red(pokemon.details) : pokemon.details} ${color.dim(pokemon.condition)} ${pokemon.item ? `holding ${pokemon.item} ` : ""}(${pokemon.ability})`,
         );
-      console.log(colors[player](player.padEnd(10, " ")));
+      console.log(playerString());
 
       // console.log(
       //   color.bold(player.padEnd(10, " ")),
