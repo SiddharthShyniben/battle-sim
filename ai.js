@@ -1,6 +1,5 @@
 const { BattleStream, getPlayerStreams, Teams } = require("pokemon-showdown");
-
-import { RandomPlayerAI } from "./random-player-ai.js";
+const { RandomPlayerAI } = require("./random-player-ai.js");
 
 const streams = getPlayerStreams(new BattleStream());
 
