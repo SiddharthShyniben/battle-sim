@@ -1,4 +1,4 @@
-const BattleText = require("./battle-text.js");
+const BattleText = require("./data/battle-text-alt.js");
 
 module.exports = class BattleTextParser {
   p1 = "Player 1";
